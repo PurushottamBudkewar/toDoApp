@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,15 +74,19 @@ public class TaskService {
      * @return task Updated Task object
      */
     public Task updateTask(int id, Task task) {
-        Task updateTask = taskRepository.findById(id)
-                .orElse(taskRepository.save(task));
 
-        updateTask.setUserName(task.getUserName());
-        updateTask.setTaskName(task.getTaskName());
-        updateTask.setTaskDescription(task.getTaskDescription());
-        updateTask.setTaskStatus(task.getTaskStatus());
-        return taskRepository.save(updateTask);
-
+        Optional<Task> updateTask = taskRepository.findById(id);
+        Task taskSaved = null;
+        if(updateTask.isPresent()){
+            updateTask.get().setUserName(task.getUserName());
+            updateTask.get().setTaskName(task.getTaskName());
+            updateTask.get().setTaskDescription(task.getTaskDescription());
+            updateTask.get().setTaskStatus(task.getTaskStatus());
+            taskSaved = taskRepository.save(updateTask.get());
+        }else{
+            taskSaved = taskRepository.save(task);
+        }
+        return taskSaved;
     }
 
     /**
